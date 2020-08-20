@@ -15,24 +15,18 @@ namespace WebAppiTest0.Controllers
 
         public CreditsController(DatabaseSource context)
         {
-            _context = context;
-            //Credit[] credits = new Credit[5000];
-            //Source[] sources = new Source[5000];
-            //for (int i = 0; i < 5000; i++)
-            //{
-            //    credits[i] = new Credit { Title = Faker.Name.FullName() };
-            //    sources[i] = new Source { Description = Faker.Name.FullName() };
-            //}
-            //_context.AddRange(credits);
-            //_context.AddRange(sources);
-            //_context.SaveChanges();
+            _context = context;            
         }
 
         // GET: api/Credits
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Credit>>> GetCredit()
+        public async Task<ActionResult<IEnumerable<Credit>>> GetCredit(int? limit)
         {
-            return await _context.Credit.ToListAsync();
+            return await _context.Credit
+                    .AsNoTracking()
+                    .OrderBy(c => c.Id)
+                    .Take(limit ?? 100)
+                    .ToListAsync();
         }
 
         // GET: api/Credits/5

@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Canducci.Pagination;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using WebAppiTest0.Models;
 
 namespace WebAppiTest0.Controllers
@@ -22,9 +21,28 @@ namespace WebAppiTest0.Controllers
 
         // GET: api/Sources
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Source>>> GetSource()
+        public async Task<ActionResult<IEnumerable<Source>>> GetSource(int? limit)
         {
-            return await _context.Source.ToListAsync();
+            return await _context
+                    .Source
+                    .AsNoTracking()
+                    .OrderBy(c => c.Id)
+                    .Take(limit ?? 100)
+                    .ToListAsync();
+        }
+
+        [HttpGet("page/{page?}")]
+        public async Task<IActionResult> GetSourcePaginated(int? page)
+        {
+            page ??= 1;
+            if (page <= 0) page = 1;
+
+            var result = await _context
+                    .Source
+                    .AsNoTracking()
+                    .OrderBy(c => c.Id)
+                    .ToPaginatedRestAsync(page.Value, 10);
+            return Ok(result);
         }
 
         // GET: api/Sources/5
